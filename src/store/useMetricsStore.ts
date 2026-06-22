@@ -15,15 +15,18 @@ export interface MetricEntry {
 
 interface MetricsState {
   entries: MetricEntry[];
+  targetWeight: number | null;
   addEntry: (entry: Omit<MetricEntry, 'id'>) => void;
   updateEntry: (id: string, entry: Omit<MetricEntry, 'id'>) => void;
   deleteEntry: (id: string) => void;
+  setTargetWeight: (weight: number | null) => void;
 }
 
 export const useMetricsStore = create<MetricsState>()(
   persist(
     (set) => ({
       entries: [],
+      targetWeight: null,
       addEntry: (data) =>
         set((state) => ({
           entries: [
@@ -43,6 +46,10 @@ export const useMetricsStore = create<MetricsState>()(
       deleteEntry: (id) =>
         set((state) => ({
           entries: state.entries.filter((entry) => entry.id !== id),
+        })),
+      setTargetWeight: (weight) =>
+        set(() => ({
+          targetWeight: weight,
         })),
     }),
     {

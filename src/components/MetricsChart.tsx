@@ -7,7 +7,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  ReferenceArea
+  ReferenceArea,
+  ReferenceLine
 } from 'recharts';
 import { useMetricsStore } from '../store/useMetricsStore';
 
@@ -53,6 +54,7 @@ const metricZones: Record<MetricKey, {y1: number, y2: number, color: string}[]> 
 
 export default function MetricsChart() {
   const entries = useMetricsStore((state) => state.entries);
+  const targetWeight = useMetricsStore((state) => state.targetWeight);
   const [selectedMetric, setSelectedMetric] = useState<MetricKey>('weight');
 
   const chartData = useMemo(() => {
@@ -91,12 +93,22 @@ export default function MetricsChart() {
             {currentZones.map((zone, idx) => (
               <ReferenceArea 
                 key={idx} 
+                x1="dataMin"
+                x2="dataMax"
                 y1={zone.y1} 
                 y2={zone.y2} 
                 fill={zone.color} 
                 strokeOpacity={0} 
               />
             ))}
+            {selectedMetric === 'weight' && targetWeight !== null && (
+              <ReferenceLine 
+                y={targetWeight} 
+                stroke="#ff5252" 
+                strokeDasharray="5 5" 
+                label={{ position: 'top', value: `目標: ${targetWeight}kg`, fill: '#ff5252', fontSize: 12, fontWeight: 'bold' }} 
+              />
+            )}
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.5)" vertical={false} />
             <XAxis 
               dataKey="timestamp" 

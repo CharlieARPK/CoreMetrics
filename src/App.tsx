@@ -3,8 +3,31 @@ import { useMetricsStore } from './store/useMetricsStore';
 import MetricsChart from './components/MetricsChart';
 
 function App() {
-  const { entries, addEntry, updateEntry, deleteEntry } = useMetricsStore();
+  const { entries, targetWeight, setTargetWeight, addEntry, updateEntry, deleteEntry } = useMetricsStore();
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTarget, setEditingTarget] = useState(false);
+  const [tempTarget, setTempTarget] = useState('');
+
+  const handleSaveTarget = () => {
+    const weight = Number(tempTarget);
+    if (weight > 0) {
+      setTargetWeight(weight);
+      setEditingTarget(false);
+    }
+  };
+
+  const getDistanceToTarget = () => {
+    if (!targetWeight || entries.length === 0) return null;
+    const latestWeight = entries[0].weight;
+    const diff = latestWeight - targetWeight;
+    if (diff > 0) {
+      return `目標まであと ${diff.toFixed(1)} kg`;
+    } else if (diff < 0) {
+      return `目標を ${Math.abs(diff).toFixed(1)} kg クリア！`;
+    } else {
+      return `目標体重クリア！🎉`;
+    }
+  };
 
   const getLocalNow = () => {
     const now = new Date();
@@ -111,6 +134,35 @@ function App() {
       </header>
 
       <main>
+        <section className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <h2 style={{ fontSize: '1rem', color: 'var(--text-muted)', margin: 0 }}>目標体重</h2>
+            {editingTarget ? (
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <input type="number" step="0.1" className="form-input" style={{ width: '100px' }} value={tempTarget} onChange={(e) => setTempTarget(e.target.value)} placeholder="0.0" />
+                <button className="btn btn-primary" onClick={handleSaveTarget} style={{ padding: '0.5rem 1rem' }}>保存</button>
+                <button className="btn" onClick={() => setEditingTarget(false)} style={{ padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.7)', color: '#333' }}>取消</button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginTop: '0.5rem' }}>
+                <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: 'var(--primary-dark)' }}>
+                  {targetWeight ? `${targetWeight} kg` : '未設定'}
+                </div>
+                <button onClick={() => { setTempTarget(targetWeight ? String(targetWeight) : ''); setEditingTarget(true); }} style={{ background: 'none', border: 'none', color: '#1976d2', cursor: 'pointer', fontSize: '0.9rem' }}>
+                  ✏️設定
+                </button>
+              </div>
+            )}
+          </div>
+          {getDistanceToTarget() && (
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#ff5252' }}>
+                {getDistanceToTarget()}
+              </div>
+            </div>
+          )}
+        </section>
+
         <section className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem' }}>
           <h2 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', color: 'var(--primary-dark)' }}>
             {editingId ? '記録の修正' : '新規記録'}
