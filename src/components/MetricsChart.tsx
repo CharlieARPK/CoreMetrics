@@ -67,6 +67,14 @@ export default function MetricsChart() {
     });
   }, [entries]);
 
+  const xDomain = useMemo(() => {
+    if (chartData.length <= 1) {
+      const time = chartData[0]?.timestamp || Date.now();
+      return [time - 86400000, time + 86400000]; // 1データしかない場合は前後1日をドメインにする
+    }
+    return ['auto', 'auto'];
+  }, [chartData]);
+
   if (entries.length === 0) return null;
 
   const currentZones = metricZones[selectedMetric] || [];
@@ -93,12 +101,11 @@ export default function MetricsChart() {
             {currentZones.map((zone, idx) => (
               <ReferenceArea 
                 key={idx} 
-                x1="dataMin"
-                x2="dataMax"
                 y1={zone.y1} 
                 y2={zone.y2} 
                 fill={zone.color} 
                 strokeOpacity={0} 
+                ifOverflow="hidden"
               />
             ))}
             {selectedMetric === 'weight' && targetWeight !== null && (
@@ -107,13 +114,14 @@ export default function MetricsChart() {
                 stroke="#ff5252" 
                 strokeDasharray="5 5" 
                 label={{ position: 'top', value: `目標: ${targetWeight}kg`, fill: '#ff5252', fontSize: 12, fontWeight: 'bold' }} 
+                ifOverflow="extendDomain"
               />
             )}
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.5)" vertical={false} />
             <XAxis 
               dataKey="timestamp" 
               type="number"
-              domain={['dataMin', 'dataMax']}
+              domain={xDomain}
               tickFormatter={(unixTime) => {
                 const d = new Date(unixTime);
                 return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
