@@ -42,8 +42,8 @@ const metricZones: Record<MetricKey, {y1?: number, y2?: number, color: string}[]
     { y1: 32.9, color: 'rgba(76, 175, 80, 0.2)' } // 標準・高い（良い）
   ],
   bodyAge: [
-    { y2: 34, color: 'rgba(76, 175, 80, 0.2)' }, // 実年齢以下（良い）
-    { y1: 34, color: 'rgba(255, 152, 0, 0.2)' } // 実年齢より上
+    { y2: 36, color: 'rgba(76, 175, 80, 0.2)' }, // 実年齢以下（良い）: 35歳以下
+    { y1: 36, color: 'rgba(255, 152, 0, 0.2)' } // 実年齢より上: 36歳以上
   ],
   restingMetabolism: [],
   bmi: [
