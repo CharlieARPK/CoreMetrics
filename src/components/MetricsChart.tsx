@@ -24,33 +24,30 @@ const metricsOptions = [
 type MetricKey = typeof metricsOptions[number]['key'];
 
 // 33歳男性向け基準値 (オムロン等一般的な指標に基づく)
-const metricZones: Record<MetricKey, {y1?: number, y2?: number, color: string}[]> = {
+const metricZones: Record<MetricKey, {y1: number, y2: number, color: string}[]> = {
   weight: [],
   bodyFat: [
-    { y2: 10, color: 'rgba(255, 235, 59, 0.2)' }, // 低い
+    { y1: 0, y2: 10, color: 'rgba(255, 235, 59, 0.2)' }, // 低い
     { y1: 10, y2: 20, color: 'rgba(76, 175, 80, 0.2)' }, // 標準
     { y1: 20, y2: 25, color: 'rgba(255, 152, 0, 0.2)' }, // やや高い
-    { y1: 25, color: 'rgba(244, 67, 54, 0.2)' } // 高い
+    { y1: 25, y2: 100, color: 'rgba(244, 67, 54, 0.2)' } // 高い
   ],
   visceralFat: [
-    { y2: 10, color: 'rgba(76, 175, 80, 0.2)' }, // 標準
+    { y1: 0, y2: 10, color: 'rgba(76, 175, 80, 0.2)' }, // 標準
     { y1: 10, y2: 15, color: 'rgba(255, 152, 0, 0.2)' }, // やや高い
-    { y1: 15, color: 'rgba(244, 67, 54, 0.2)' } // 高い
+    { y1: 15, y2: 100, color: 'rgba(244, 67, 54, 0.2)' } // 高い
   ],
-  skeletalMuscle: [
-    { y2: 32.9, color: 'rgba(255, 235, 59, 0.2)' }, // 低い
-    { y1: 32.9, color: 'rgba(76, 175, 80, 0.2)' } // 標準・高い（良い）
-  ],
+  skeletalMuscle: [], // ユーザー要望により色は塗らない
   bodyAge: [
-    { y2: 36, color: 'rgba(76, 175, 80, 0.2)' }, // 実年齢以下（良い）: 35歳以下
-    { y1: 36, color: 'rgba(255, 152, 0, 0.2)' } // 実年齢より上: 36歳以上
+    { y1: 0, y2: 36, color: 'rgba(76, 175, 80, 0.2)' }, // 実年齢以下（良い）: 35歳以下
+    { y1: 36, y2: 200, color: 'rgba(255, 152, 0, 0.2)' } // 実年齢より上: 36歳以上
   ],
   restingMetabolism: [],
   bmi: [
-    { y2: 18.5, color: 'rgba(255, 235, 59, 0.2)' }, // 低体重
+    { y1: 0, y2: 18.5, color: 'rgba(255, 235, 59, 0.2)' }, // 低体重
     { y1: 18.5, y2: 25, color: 'rgba(76, 175, 80, 0.2)' }, // 普通体重
     { y1: 25, y2: 30, color: 'rgba(255, 152, 0, 0.2)' }, // 肥満(1度)
-    { y1: 30, color: 'rgba(244, 67, 54, 0.2)' } // 肥満(2度以上)
+    { y1: 30, y2: 100, color: 'rgba(244, 67, 54, 0.2)' } // 肥満(2度以上)
   ]
 };
 
@@ -102,7 +99,13 @@ export default function MetricsChart() {
             ))}
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.5)" vertical={false} />
             <XAxis 
-              dataKey="displayDate" 
+              dataKey="timestamp" 
+              type="number"
+              domain={['dataMin', 'dataMax']}
+              tickFormatter={(unixTime) => {
+                const d = new Date(unixTime);
+                return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+              }}
               tick={{ fill: 'var(--text-muted)', fontSize: 12 }} 
               axisLine={false} 
               tickLine={false} 
@@ -114,6 +117,10 @@ export default function MetricsChart() {
               tickLine={false} 
             />
             <Tooltip 
+              labelFormatter={(label) => {
+                const d = new Date(label as number);
+                return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+              }}
               contentStyle={{ 
                 background: 'rgba(255, 255, 255, 0.8)', 
                 backdropFilter: 'blur(10px)', 
