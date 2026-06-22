@@ -4,9 +4,15 @@ import MetricsChart from './components/MetricsChart';
 
 function App() {
   const { entries, addEntry, deleteEntry } = useMetricsStore();
-  
+
+  const getLocalNow = () => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    return now.toISOString().slice(0, 16);
+  };
+
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().slice(0, 16),
+    date: getLocalNow(),
     weight: '',
     bodyFat: '',
     skeletalMuscle: '',
@@ -40,7 +46,7 @@ function App() {
     addEntry(newEntry);
     
     setFormData({
-      date: new Date().toISOString().slice(0, 16),
+      date: getLocalNow(),
       weight: '',
       bodyFat: '',
       skeletalMuscle: '',
