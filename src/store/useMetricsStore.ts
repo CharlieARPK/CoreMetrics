@@ -16,6 +16,7 @@ export interface MetricEntry {
 interface MetricsState {
   entries: MetricEntry[];
   addEntry: (entry: Omit<MetricEntry, 'id'>) => void;
+  updateEntry: (id: string, entry: Omit<MetricEntry, 'id'>) => void;
   deleteEntry: (id: string) => void;
 }
 
@@ -32,6 +33,12 @@ export const useMetricsStore = create<MetricsState>()(
             },
             ...state.entries,
           ].sort((a, b) => b.timestamp - a.timestamp),
+        })),
+      updateEntry: (id, updatedData) =>
+        set((state) => ({
+          entries: state.entries.map((entry) =>
+            entry.id === id ? { ...updatedData, id } : entry
+          ).sort((a, b) => b.timestamp - a.timestamp),
         })),
       deleteEntry: (id) =>
         set((state) => ({
