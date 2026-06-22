@@ -1,0 +1,16 @@
+{
+  "name": "CoreMetrics Tracker",
+  "short_name": "CoreMetrics",
+  "start_url": "/CoreMetrics/",
+  "display": "standalone",
+  "background_color": "#e0f2f1",
+  "theme_color": "#00bfa5",
+  "icons": [
+    {
+      "src": "vite.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
