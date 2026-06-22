@@ -6,6 +6,7 @@ function App() {
   const { entries, addEntry, deleteEntry } = useMetricsStore();
   
   const [formData, setFormData] = useState({
+    date: new Date().toISOString().slice(0, 16),
     weight: '',
     bodyFat: '',
     skeletalMuscle: '',
@@ -26,6 +27,7 @@ function App() {
     e.preventDefault();
     
     const newEntry = {
+      timestamp: new Date(formData.date).getTime(),
       weight: Number(formData.weight) || 0,
       bodyFat: Number(formData.bodyFat) || 0,
       skeletalMuscle: Number(formData.skeletalMuscle) || 0,
@@ -38,6 +40,7 @@ function App() {
     addEntry(newEntry);
     
     setFormData({
+      date: new Date().toISOString().slice(0, 16),
       weight: '',
       bodyFat: '',
       skeletalMuscle: '',
@@ -64,6 +67,11 @@ function App() {
         <section className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem' }}>
           <h2 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', color: 'var(--primary-dark)' }}>新規記録</h2>
           <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label" htmlFor="date">測定日時</label>
+              <input type="datetime-local" id="date" name="date" className="form-input" value={formData.date} onChange={handleChange} required />
+            </div>
+
             <div className="form-group">
               <label className="form-label" htmlFor="weight">体重 (kg)</label>
               <input type="number" step="0.1" id="weight" name="weight" className="form-input" value={formData.weight} onChange={handleChange} required />

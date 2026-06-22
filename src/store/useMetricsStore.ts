@@ -15,7 +15,7 @@ export interface MetricEntry {
 
 interface MetricsState {
   entries: MetricEntry[];
-  addEntry: (entry: Omit<MetricEntry, 'id' | 'timestamp'>) => void;
+  addEntry: (entry: Omit<MetricEntry, 'id'>) => void;
   deleteEntry: (id: string) => void;
 }
 
@@ -29,7 +29,6 @@ export const useMetricsStore = create<MetricsState>()(
             {
               ...data,
               id: crypto.randomUUID(),
-              timestamp: Date.now(),
             },
             ...state.entries,
           ].sort((a, b) => b.timestamp - a.timestamp),
