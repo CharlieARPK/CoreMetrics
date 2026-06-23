@@ -7,6 +7,7 @@ function App() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTarget, setEditingTarget] = useState(false);
   const [tempTarget, setTempTarget] = useState('');
+  const [displayCount, setDisplayCount] = useState(10);
 
   const handleSaveTarget = () => {
     const weight = Number(tempTarget);
@@ -230,7 +231,7 @@ function App() {
           <section className="glass-panel" style={{ padding: '2rem' }}>
             <h2 style={{ marginBottom: '1.5rem', fontSize: '1.25rem', color: 'var(--primary-dark)' }}>最近の記録</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {entries.map(entry => (
+              {entries.slice(0, displayCount).map(entry => (
                 <div key={entry.id} style={{ 
                   background: 'rgba(255,255,255,0.4)', 
                   padding: '1rem', 
@@ -266,6 +267,17 @@ function App() {
                 </div>
               ))}
             </div>
+            {entries.length > displayCount && (
+              <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+                <button 
+                  onClick={() => setDisplayCount(prev => prev + 10)} 
+                  className="btn" 
+                  style={{ background: 'rgba(255,255,255,0.7)', color: 'var(--primary-dark)', padding: '0.75rem 2rem', borderRadius: '24px', border: '1px solid var(--glass-border)', fontSize: '0.9rem', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  もっと見る（さらに10件表示）
+                </button>
+              </div>
+            )}
           </section>
         )}
       </main>
