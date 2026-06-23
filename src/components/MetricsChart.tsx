@@ -77,92 +77,120 @@ export default function MetricsChart() {
 
   if (entries.length === 0) return null;
 
-  const currentZones = metricZones[selectedMetric] || [];
+  const renderChart = (metric: MetricKey, chartHeight: string, showTitle: boolean) => {
+    const currentZones = metricZones[metric] || [];
+    const metricInfo = metricsOptions.find(o => o.key === metric);
+
+    return (
+      <div style={{ marginBottom: showTitle ? '2rem' : '0' }}>
+        {showTitle && (
+          <h3 style={{ fontSize: '1.1rem', color: 'var(--primary-dark)', marginBottom: '0.5rem', textAlign: 'center' }}>
+            {metricInfo?.label}
+          </h3>
+        )}
+        <div style={{ height: chartHeight, width: '100%' }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+              {currentZones.map((zone, idx) => (
+                <ReferenceArea 
+                  key={idx} 
+                  y1={zone.y1} 
+                  y2={zone.y2} 
+                  fill={zone.color} 
+                  strokeOpacity={0} 
+                  ifOverflow="hidden"
+                />
+              ))}
+              {metric === 'weight' && targetWeight !== null && (
+                <ReferenceLine 
+                  y={targetWeight} 
+                  stroke="#ff5252" 
+                  strokeDasharray="5 5" 
+                  label={{ position: 'top', value: `目標: ${targetWeight}kg`, fill: '#ff5252', fontSize: 12, fontWeight: 'bold' }} 
+                  ifOverflow="extendDomain"
+                />
+              )}
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.5)" vertical={false} />
+              <XAxis 
+                dataKey="timestamp" 
+                type="number"
+                domain={xDomain}
+                tickFormatter={(unixTime) => {
+                  const d = new Date(unixTime);
+                  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+                }}
+                tick={{ fill: 'var(--text-muted)', fontSize: 12 }} 
+                axisLine={false} 
+                tickLine={false} 
+              />
+              <YAxis 
+                domain={['auto', 'auto']} 
+                tick={{ fill: 'var(--text-muted)', fontSize: 12 }} 
+                axisLine={false} 
+                tickLine={false} 
+              />
+              <Tooltip 
+                labelFormatter={(label) => {
+                  const d = new Date(label as number);
+                  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                }}
+                contentStyle={{ 
+                  background: 'rgba(255, 255, 255, 0.8)', 
+                  backdropFilter: 'blur(10px)', 
+                  border: '1px solid rgba(255, 255, 255, 0.6)', 
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                  color: 'var(--text-main)'
+                }}
+                itemStyle={{ color: 'var(--primary-dark)', fontWeight: 'bold' }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey={metric} 
+                name={metricInfo?.label}
+                stroke="var(--primary-color)" 
+                strokeWidth={3}
+                dot={{ fill: 'var(--primary-color)', strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <section className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <h2 style={{ fontSize: '1.25rem', color: 'var(--primary-dark)', margin: 0 }}>グラフ推移</h2>
-        <select 
-          className="form-input" 
-          style={{ width: 'auto', padding: '0.5rem', fontSize: '0.9rem' }}
-          value={selectedMetric}
-          onChange={(e) => setSelectedMetric(e.target.value as MetricKey)}
-        >
-          {metricsOptions.map(opt => (
-            <option key={opt.key} value={opt.key}>{opt.label}</option>
-          ))}
-        </select>
-      </div>
-
-      <div style={{ height: '300px', width: '100%', marginTop: '1rem' }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-            {currentZones.map((zone, idx) => (
-              <ReferenceArea 
-                key={idx} 
-                y1={zone.y1} 
-                y2={zone.y2} 
-                fill={zone.color} 
-                strokeOpacity={0} 
-                ifOverflow="hidden"
-              />
+    <>
+      {/* 選択式のメイングラフ */}
+      <section className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+          <h2 style={{ fontSize: '1.25rem', color: 'var(--primary-dark)', margin: 0 }}>メイングラフ</h2>
+          <select 
+            className="form-input" 
+            style={{ width: 'auto', padding: '0.5rem', fontSize: '0.9rem' }}
+            value={selectedMetric}
+            onChange={(e) => setSelectedMetric(e.target.value as MetricKey)}
+          >
+            {metricsOptions.map(opt => (
+              <option key={opt.key} value={opt.key}>{opt.label}</option>
             ))}
-            {selectedMetric === 'weight' && targetWeight !== null && (
-              <ReferenceLine 
-                y={targetWeight} 
-                stroke="#ff5252" 
-                strokeDasharray="5 5" 
-                label={{ position: 'top', value: `目標: ${targetWeight}kg`, fill: '#ff5252', fontSize: 12, fontWeight: 'bold' }} 
-                ifOverflow="extendDomain"
-              />
-            )}
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.5)" vertical={false} />
-            <XAxis 
-              dataKey="timestamp" 
-              type="number"
-              domain={xDomain}
-              tickFormatter={(unixTime) => {
-                const d = new Date(unixTime);
-                return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
-              }}
-              tick={{ fill: 'var(--text-muted)', fontSize: 12 }} 
-              axisLine={false} 
-              tickLine={false} 
-            />
-            <YAxis 
-              domain={['auto', 'auto']} 
-              tick={{ fill: 'var(--text-muted)', fontSize: 12 }} 
-              axisLine={false} 
-              tickLine={false} 
-            />
-            <Tooltip 
-              labelFormatter={(label) => {
-                const d = new Date(label as number);
-                return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-              }}
-              contentStyle={{ 
-                background: 'rgba(255, 255, 255, 0.8)', 
-                backdropFilter: 'blur(10px)', 
-                border: '1px solid rgba(255, 255, 255, 0.6)', 
-                borderRadius: '12px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                color: 'var(--text-main)'
-              }}
-              itemStyle={{ color: 'var(--primary-dark)', fontWeight: 'bold' }}
-            />
-            <Line 
-              type="monotone" 
-              dataKey={selectedMetric} 
-              name={metricsOptions.find(o => o.key === selectedMetric)?.label}
-              stroke="var(--primary-color)" 
-              strokeWidth={3}
-              dot={{ fill: 'var(--primary-color)', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    </section>
+          </select>
+        </div>
+        {renderChart(selectedMetric, '300px', false)}
+      </section>
+
+      {/* 常時表示の全項目グラフ */}
+      <section className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem' }}>
+        <h2 style={{ fontSize: '1.25rem', color: 'var(--primary-dark)', marginBottom: '1.5rem' }}>すべての項目の推移</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+          {metricsOptions.map(opt => (
+            <div key={opt.key} style={{ background: 'rgba(255,255,255,0.3)', padding: '1rem', borderRadius: '12px' }}>
+              {renderChart(opt.key, '200px', true)}
+            </div>
+          ))}
+        </div>
+      </section>
+    </>
   );
 }
