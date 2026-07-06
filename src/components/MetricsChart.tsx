@@ -107,7 +107,7 @@ export default function MetricsChart() {
 
   const xDomain = useMemo(() => {
     if (chartData.length <= 1) {
-      const time = chartData[0]?.timestamp || Date.now();
+      const time = chartData[0]?.timestamp || 0;
       return [time - 86400000, time + 86400000]; // 1データしかない場合は前後1日をドメインにする
     }
     return ['auto', 'auto'];
@@ -183,7 +183,17 @@ export default function MetricsChart() {
                 }}
                 itemStyle={{ color: 'var(--primary-dark)', fontWeight: 'bold' }}
               />
-              <Legend verticalAlign="top" height={28} wrapperStyle={{ fontSize: '0.8rem', paddingBottom: '4px' }} />
+              <Legend 
+                verticalAlign="top" 
+                height={28} 
+                wrapperStyle={{ fontSize: '0.8rem', paddingBottom: '4px' }}
+                {...({
+                  payload: [
+                    { value: metricInfo?.label || '', type: 'line', id: metric, color: 'var(--primary-color)' },
+                    { value: '移動平均', type: 'line', id: `${metric}_ma`, color: '#1e88e5' }
+                  ]
+                } as unknown as Record<string, unknown>)}
+              />
               <Line 
                 type="monotone" 
                 dataKey={metric} 

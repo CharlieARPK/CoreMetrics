@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMetricsStore } from './store/useMetricsStore';
+import type { MetricEntry } from './store/useMetricsStore';
 import MetricsChart from './components/MetricsChart';
 
 function App() {
@@ -95,7 +96,7 @@ function App() {
     });
   };
 
-  const handleEdit = (entry: any) => {
+  const handleEdit = (entry: MetricEntry) => {
     setEditingId(entry.id);
     setFormData({
       date: getLocalDateString(entry.timestamp),
