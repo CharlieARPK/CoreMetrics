@@ -191,13 +191,42 @@ export default function MetricsChart() {
               <Legend 
                 verticalAlign="top" 
                 height={28} 
-                wrapperStyle={{ fontSize: '0.8rem', paddingBottom: '4px' }}
-                {...({
-                  payload: [
-                    { value: metricInfo?.label || '', type: 'line', id: metric, color: 'var(--primary-color)' },
-                    { value: '移動平均', type: 'line', id: `${metric}_ma`, color: '#1e88e5' }
-                  ]
-                } as unknown as Record<string, unknown>)}
+                content={(props) => {
+                  const payload = props.payload as Array<{
+                    value?: string;
+                    id?: string;
+                    dataKey?: string;
+                    color?: string;
+                  }> | undefined;
+                  if (!payload) return null;
+
+                  const sortedPayload = [...payload].sort((a, b) => {
+                    const aIsMa = String(a.dataKey || a.id || a.value).endsWith('_ma') || a.value === '移動平均';
+                    const bIsMa = String(b.dataKey || b.id || b.value).endsWith('_ma') || b.value === '移動平均';
+                    if (aIsMa && !bIsMa) return 1;
+                    if (!aIsMa && bIsMa) return -1;
+                    return 0;
+                  });
+
+                  return (
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', fontSize: '0.8rem', paddingBottom: '4px' }}>
+                      {sortedPayload.map((entry, index) => (
+                        <div key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{
+                            display: 'inline-block',
+                            width: '14px',
+                            height: entry.value === '移動平均' ? '4px' : '3px',
+                            backgroundColor: entry.color || 'var(--primary-color)',
+                            borderRadius: '2px'
+                          }} />
+                          <span style={{ color: 'var(--text-main)', fontWeight: 500 }}>
+                            {entry.value}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                }}
               />
               <Line 
                 type="monotone" 
