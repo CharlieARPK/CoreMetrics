@@ -8,7 +8,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceArea,
-  ReferenceLine
+  ReferenceLine,
+  Legend
 } from 'recharts';
 import { useMetricsStore } from '../store/useMetricsStore';
 
@@ -58,11 +59,27 @@ export default function MetricsChart() {
   const [selectedMetric, setSelectedMetric] = useState<MetricKey>('weight');
 
   const chartData = useMemo(() => {
-    return [...entries].reverse().map(entry => {
+    const reversed = [...entries].reverse();
+    return reversed.map((entry, idx) => {
       const d = new Date(entry.timestamp);
+      
+      const calcMA = (key: keyof typeof entry) => {
+        const start = Math.max(0, idx - 6);
+        const windowSlice = reversed.slice(start, idx + 1);
+        const sum = windowSlice.reduce((acc, curr) => acc + (Number(curr[key]) || 0), 0);
+        return Number((sum / windowSlice.length).toFixed(1));
+      };
+
       return {
         ...entry,
-        displayDate: `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+        displayDate: `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`,
+        weight_ma: calcMA('weight'),
+        bodyFat_ma: calcMA('bodyFat'),
+        visceralFat_ma: calcMA('visceralFat'),
+        skeletalMuscle_ma: calcMA('skeletalMuscle'),
+        bodyAge_ma: calcMA('bodyAge'),
+        restingMetabolism_ma: calcMA('restingMetabolism'),
+        bmi_ma: calcMA('bmi'),
       };
     });
   }, [entries]);
@@ -144,6 +161,7 @@ export default function MetricsChart() {
                 }}
                 itemStyle={{ color: 'var(--primary-dark)', fontWeight: 'bold' }}
               />
+              <Legend verticalAlign="top" height={28} wrapperStyle={{ fontSize: '0.8rem', paddingBottom: '4px' }} />
               <Line 
                 type="monotone" 
                 dataKey={metric} 
@@ -152,6 +170,16 @@ export default function MetricsChart() {
                 strokeWidth={3}
                 dot={{ fill: 'var(--primary-color)', strokeWidth: 2, r: 4 }}
                 activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey={`${metric}_ma`} 
+                name="移動平均 (7回)"
+                stroke="#1e88e5" 
+                strokeWidth={2}
+                strokeDasharray="4 4"
+                dot={false}
+                activeDot={{ r: 4, stroke: '#fff', strokeWidth: 2 }}
               />
             </LineChart>
           </ResponsiveContainer>

@@ -53,6 +53,8 @@ function App() {
     bmi: ''
   });
 
+  const latestEntry = entries.length > 0 ? entries[0] : null;
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -176,39 +178,39 @@ function App() {
 
             <div className="form-group">
               <label className="form-label" htmlFor="weight">体重 (kg)</label>
-              <input type="number" step="0.1" id="weight" name="weight" className="form-input" value={formData.weight} onChange={handleChange} required />
+              <input type="number" step="0.1" id="weight" name="weight" className="form-input" value={formData.weight} onChange={handleChange} placeholder={latestEntry ? String(latestEntry.weight) : "0.0"} required />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group">
                 <label className="form-label" htmlFor="bodyFat">体脂肪率 (%)</label>
-                <input type="number" step="0.1" id="bodyFat" name="bodyFat" className="form-input" value={formData.bodyFat} onChange={handleChange} required />
+                <input type="number" step="0.1" id="bodyFat" name="bodyFat" className="form-input" value={formData.bodyFat} onChange={handleChange} placeholder={latestEntry ? String(latestEntry.bodyFat) : "0.0"} required />
               </div>
               <div className="form-group">
                 <label className="form-label" htmlFor="visceralFat">内臓脂肪レベル</label>
-                <input type="number" id="visceralFat" name="visceralFat" className="form-input" value={formData.visceralFat} onChange={handleChange} required />
+                <input type="number" id="visceralFat" name="visceralFat" className="form-input" value={formData.visceralFat} onChange={handleChange} placeholder={latestEntry ? String(latestEntry.visceralFat) : "0"} required />
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group">
                 <label className="form-label" htmlFor="skeletalMuscle">骨格筋率 (%)</label>
-                <input type="number" step="0.1" id="skeletalMuscle" name="skeletalMuscle" className="form-input" value={formData.skeletalMuscle} onChange={handleChange} required />
+                <input type="number" step="0.1" id="skeletalMuscle" name="skeletalMuscle" className="form-input" value={formData.skeletalMuscle} onChange={handleChange} placeholder={latestEntry ? String(latestEntry.skeletalMuscle) : "0.0"} required />
               </div>
               <div className="form-group">
                 <label className="form-label" htmlFor="bodyAge">体年齢 (才)</label>
-                <input type="number" id="bodyAge" name="bodyAge" className="form-input" value={formData.bodyAge} onChange={handleChange} required />
+                <input type="number" id="bodyAge" name="bodyAge" className="form-input" value={formData.bodyAge} onChange={handleChange} placeholder={latestEntry ? String(latestEntry.bodyAge) : "0"} required />
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group">
                 <label className="form-label" htmlFor="restingMetabolism">基礎代謝 (kcal)</label>
-                <input type="number" id="restingMetabolism" name="restingMetabolism" className="form-input" value={formData.restingMetabolism} onChange={handleChange} required />
+                <input type="number" id="restingMetabolism" name="restingMetabolism" className="form-input" value={formData.restingMetabolism} onChange={handleChange} placeholder={latestEntry ? String(latestEntry.restingMetabolism) : "0"} required />
               </div>
               <div className="form-group">
                 <label className="form-label" htmlFor="bmi">BMI</label>
-                <input type="number" step="0.1" id="bmi" name="bmi" className="form-input" value={formData.bmi} onChange={handleChange} required />
+                <input type="number" step="0.1" id="bmi" name="bmi" className="form-input" value={formData.bmi} onChange={handleChange} placeholder={latestEntry ? String(latestEntry.bmi) : "0.0"} required />
               </div>
             </div>
 
