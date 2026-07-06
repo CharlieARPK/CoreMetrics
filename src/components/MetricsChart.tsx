@@ -119,6 +119,9 @@ export default function MetricsChart() {
     const currentZones = allMetricZones[metric] || [];
     const metricInfo = metricsOptions.find(o => o.key === metric);
 
+    const minX = chartData.length <= 1 ? (chartData[0]?.timestamp || 0) - 86400000 : chartData[0]?.timestamp;
+    const maxX = chartData.length <= 1 ? (chartData[0]?.timestamp || 0) + 86400000 : chartData[chartData.length - 1]?.timestamp;
+
     return (
       <div style={{ marginBottom: showTitle ? '2rem' : '0' }}>
         {showTitle && (
@@ -132,6 +135,8 @@ export default function MetricsChart() {
               {currentZones.map((zone, idx) => (
                 <ReferenceArea 
                   key={idx} 
+                  x1={minX}
+                  x2={maxX}
                   y1={zone.y1} 
                   y2={zone.y2} 
                   fill={zone.color} 
