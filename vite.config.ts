@@ -8,9 +8,15 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          charts: ['recharts'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('recharts') || id.includes('d3')) {
+              return 'charts'
+            }
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor'
+            }
+          }
         },
       },
     },
