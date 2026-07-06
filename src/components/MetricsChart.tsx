@@ -25,38 +25,59 @@ const metricsOptions = [
 
 type MetricKey = typeof metricsOptions[number]['key'];
 
-// 33歳男性向け基準値 (オムロン等一般的な指標に基づく)
-const metricZones: Record<MetricKey, {y1: number, y2: number, color: string}[]> = {
-  weight: [],
-  bodyFat: [
-    { y1: 0, y2: 10, color: 'rgba(255, 235, 59, 0.2)' }, // 低い
-    { y1: 10, y2: 20, color: 'rgba(76, 175, 80, 0.2)' }, // 標準
-    { y1: 20, y2: 25, color: 'rgba(255, 152, 0, 0.2)' }, // やや高い
-    { y1: 25, y2: 100, color: 'rgba(244, 67, 54, 0.2)' } // 高い
-  ],
-  visceralFat: [
-    { y1: 0, y2: 10, color: 'rgba(76, 175, 80, 0.2)' }, // 標準
-    { y1: 10, y2: 15, color: 'rgba(255, 152, 0, 0.2)' }, // やや高い
-    { y1: 15, y2: 100, color: 'rgba(244, 67, 54, 0.2)' } // 高い
-  ],
-  skeletalMuscle: [], // ユーザー要望により色は塗らない
-  bodyAge: [
-    { y1: 0, y2: 36, color: 'rgba(76, 175, 80, 0.2)' }, // 実年齢以下（良い）: 35歳以下
-    { y1: 36, y2: 200, color: 'rgba(255, 152, 0, 0.2)' } // 実年齢より上: 36歳以上
-  ],
-  restingMetabolism: [],
-  bmi: [
-    { y1: 0, y2: 18.5, color: 'rgba(255, 235, 59, 0.2)' }, // 低体重
-    { y1: 18.5, y2: 25, color: 'rgba(76, 175, 80, 0.2)' }, // 普通体重
-    { y1: 25, y2: 30, color: 'rgba(255, 152, 0, 0.2)' }, // 肥満(1度)
-    { y1: 30, y2: 100, color: 'rgba(244, 67, 54, 0.2)' } // 肥満(2度以上)
-  ]
-};
-
 export default function MetricsChart() {
   const entries = useMetricsStore((state) => state.entries);
   const targetWeight = useMetricsStore((state) => state.targetWeight);
   const [selectedMetric, setSelectedMetric] = useState<MetricKey>('weight');
+
+  // ユーザーの身長(m^2)を体重とBMIから計算し、各項目の基準帯を動的に生成
+  const allMetricZones = useMemo(() => {
+    let heightSq = 3.0625; // デフォルト1.75m (1.75^2 = 3.0625)
+    const validEntry = entries.find(e => e.weight > 0 && e.bmi > 0);
+    if (validEntry) {
+      heightSq = validEntry.weight / validEntry.bmi;
+    }
+
+    return {
+      weight: [
+        { y1: 0, y2: Number((18.5 * heightSq).toFixed(1)), color: 'rgba(255, 235, 59, 0.2)' }, // 低体重
+        { y1: Number((18.5 * heightSq).toFixed(1)), y2: Number((25 * heightSq).toFixed(1)), color: 'rgba(76, 175, 80, 0.2)' }, // 普通体重
+        { y1: Number((25 * heightSq).toFixed(1)), y2: Number((30 * heightSq).toFixed(1)), color: 'rgba(255, 152, 0, 0.2)' }, // 肥満(1度)
+        { y1: Number((30 * heightSq).toFixed(1)), y2: 300, color: 'rgba(244, 67, 54, 0.2)' } // 肥満(2度以上)
+      ],
+      bodyFat: [
+        { y1: 0, y2: 10, color: 'rgba(255, 235, 59, 0.2)' },
+        { y1: 10, y2: 20, color: 'rgba(76, 175, 80, 0.2)' },
+        { y1: 20, y2: 25, color: 'rgba(255, 152, 0, 0.2)' },
+        { y1: 25, y2: 100, color: 'rgba(244, 67, 54, 0.2)' }
+      ],
+      visceralFat: [
+        { y1: 0, y2: 10, color: 'rgba(76, 175, 80, 0.2)' },
+        { y1: 10, y2: 15, color: 'rgba(255, 152, 0, 0.2)' },
+        { y1: 15, y2: 100, color: 'rgba(244, 67, 54, 0.2)' }
+      ],
+      skeletalMuscle: [
+        { y1: 0, y2: 30.0, color: 'rgba(244, 67, 54, 0.2)' }, // 低い(要注意)
+        { y1: 30.0, y2: 32.8, color: 'rgba(255, 235, 59, 0.2)' }, // やや低い
+        { y1: 32.8, y2: 100, color: 'rgba(76, 175, 80, 0.2)' } // 標準〜高い(健康)
+      ],
+      bodyAge: [
+        { y1: 0, y2: 36, color: 'rgba(76, 175, 80, 0.2)' },
+        { y1: 36, y2: 200, color: 'rgba(255, 152, 0, 0.2)' }
+      ],
+      restingMetabolism: [
+        { y1: 0, y2: 1400, color: 'rgba(244, 67, 54, 0.2)' }, // 低い
+        { y1: 1400, y2: 1530, color: 'rgba(255, 235, 59, 0.2)' }, // 平均よりやや下
+        { y1: 1530, y2: 5000, color: 'rgba(76, 175, 80, 0.2)' } // 35歳男性平均(1530kcal)以上
+      ],
+      bmi: [
+        { y1: 0, y2: 18.5, color: 'rgba(255, 235, 59, 0.2)' },
+        { y1: 18.5, y2: 25, color: 'rgba(76, 175, 80, 0.2)' },
+        { y1: 25, y2: 30, color: 'rgba(255, 152, 0, 0.2)' },
+        { y1: 30, y2: 100, color: 'rgba(244, 67, 54, 0.2)' }
+      ]
+    };
+  }, [entries]);
 
   const chartData = useMemo(() => {
     const reversed = [...entries].reverse();
@@ -95,7 +116,7 @@ export default function MetricsChart() {
   if (entries.length === 0) return null;
 
   const renderChart = (metric: MetricKey, chartHeight: string, showTitle: boolean) => {
-    const currentZones = metricZones[metric] || [];
+    const currentZones = allMetricZones[metric] || [];
     const metricInfo = metricsOptions.find(o => o.key === metric);
 
     return (
@@ -147,12 +168,13 @@ export default function MetricsChart() {
                 tickLine={false} 
               />
               <Tooltip 
+                itemSorter={(item) => (String(item.dataKey).endsWith('_ma') ? 1 : -1)}
                 labelFormatter={(label) => {
                   const d = new Date(label as number);
                   return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
                 }}
                 contentStyle={{ 
-                  background: 'rgba(255, 255, 255, 0.8)', 
+                  background: 'rgba(255, 255, 255, 0.85)', 
                   backdropFilter: 'blur(10px)', 
                   border: '1px solid rgba(255, 255, 255, 0.6)', 
                   borderRadius: '12px',
@@ -167,17 +189,16 @@ export default function MetricsChart() {
                 dataKey={metric} 
                 name={metricInfo?.label}
                 stroke="var(--primary-color)" 
-                strokeWidth={3}
+                strokeWidth={1.5}
                 dot={{ fill: 'var(--primary-color)', strokeWidth: 2, r: 4 }}
                 activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }}
               />
               <Line 
                 type="monotone" 
                 dataKey={`${metric}_ma`} 
-                name="移動平均 (7回)"
+                name="移動平均"
                 stroke="#1e88e5" 
-                strokeWidth={2}
-                strokeDasharray="4 4"
+                strokeWidth={2.5}
                 dot={false}
                 activeDot={{ r: 4, stroke: '#fff', strokeWidth: 2 }}
               />
