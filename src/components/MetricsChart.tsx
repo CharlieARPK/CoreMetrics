@@ -25,6 +25,7 @@ const metricsOptions = [
 ] as const;
 
 type MetricKey = typeof metricsOptions[number]['key'];
+const MALE_WAIST_MOTIVATION_CM = 80;
 const MALE_WAIST_THRESHOLD_CM = 85;
 
 export default function MetricsChart() {
@@ -48,7 +49,8 @@ export default function MetricsChart() {
         { y1: Number((30 * heightSq).toFixed(1)), y2: 300, color: 'rgba(244, 67, 54, 0.2)' } // 肥満(2度以上)
       ],
       waist: [
-        { y1: 0, y2: MALE_WAIST_THRESHOLD_CM, color: 'rgba(76, 175, 80, 0.2)' },
+        { y1: 0, y2: MALE_WAIST_MOTIVATION_CM, color: 'rgba(76, 175, 80, 0.2)' },
+        { y1: MALE_WAIST_MOTIVATION_CM, y2: MALE_WAIST_THRESHOLD_CM, color: 'rgba(255, 235, 59, 0.25)' },
         { y1: MALE_WAIST_THRESHOLD_CM, y2: 200, color: 'rgba(244, 67, 54, 0.2)' }
       ],
       bodyFat: [
