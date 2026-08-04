@@ -318,7 +318,7 @@ function App() {
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="waist">腹囲 (cm・任意)</label>
+              <label className="form-label" htmlFor="waist">腹囲 (cm)</label>
               <input
                 type="number"
                 step="0.1"
@@ -329,6 +329,7 @@ function App() {
                 value={formData.waist}
                 onChange={handleChange}
                 placeholder={latestEntry?.waist === undefined ? "未測定" : String(latestEntry.waist)}
+                required
               />
             </div>
 

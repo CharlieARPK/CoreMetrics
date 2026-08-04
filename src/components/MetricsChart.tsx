@@ -25,6 +25,7 @@ const metricsOptions = [
 ] as const;
 
 type MetricKey = typeof metricsOptions[number]['key'];
+const MALE_WAIST_THRESHOLD_CM = 85;
 
 export default function MetricsChart() {
   const entries = useMetricsStore((state) => state.entries);
@@ -46,7 +47,10 @@ export default function MetricsChart() {
         { y1: Number((25 * heightSq).toFixed(1)), y2: Number((30 * heightSq).toFixed(1)), color: 'rgba(255, 152, 0, 0.2)' }, // 肥満(1度)
         { y1: Number((30 * heightSq).toFixed(1)), y2: 300, color: 'rgba(244, 67, 54, 0.2)' } // 肥満(2度以上)
       ],
-      waist: [],
+      waist: [
+        { y1: 0, y2: MALE_WAIST_THRESHOLD_CM, color: 'rgba(76, 175, 80, 0.2)' },
+        { y1: MALE_WAIST_THRESHOLD_CM, y2: 200, color: 'rgba(244, 67, 54, 0.2)' }
+      ],
       bodyFat: [
         { y1: 0, y2: 10, color: 'rgba(255, 235, 59, 0.2)' },
         { y1: 10, y2: 20, color: 'rgba(76, 175, 80, 0.2)' },
@@ -167,6 +171,15 @@ export default function MetricsChart() {
                   stroke="#ff5252" 
                   strokeDasharray="5 5" 
                   label={{ position: 'top', value: `目標: ${targetWeight}kg`, fill: '#ff5252', fontSize: 12, fontWeight: 'bold' }} 
+                  ifOverflow="extendDomain"
+                />
+              )}
+              {metric === 'waist' && (
+                <ReferenceLine
+                  y={MALE_WAIST_THRESHOLD_CM}
+                  stroke="#e53935"
+                  strokeDasharray="5 5"
+                  label={{ position: 'top', value: `男性基準: ${MALE_WAIST_THRESHOLD_CM}cm`, fill: '#e53935', fontSize: 12, fontWeight: 'bold' }}
                   ifOverflow="extendDomain"
                 />
               )}
