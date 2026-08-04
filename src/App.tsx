@@ -10,6 +10,32 @@ function App() {
   const [tempTarget, setTempTarget] = useState('');
   const [displayCount, setDisplayCount] = useState(10);
 
+  const handleExport = () => {
+    const backup = {
+      format: 'coremetrics-backup',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      data: {
+        entries,
+        targetWeight,
+      },
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const localDate = new Date();
+    localDate.setMinutes(localDate.getMinutes() - localDate.getTimezoneOffset());
+
+    link.href = url;
+    link.download = `coremetrics-backup-${localDate.toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const handleSaveTarget = () => {
     const weight = Number(tempTarget);
     if (weight > 0) {
@@ -135,6 +161,14 @@ function App() {
       <header className="app-header">
         <h1 className="app-title">CoreMetrics</h1>
         <p className="app-subtitle">Omron HBF-214-W Data Logger</p>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={handleExport}
+          style={{ width: 'auto', marginTop: '0.75rem' }}
+        >
+          データをエクスポート
+        </button>
       </header>
 
       <main>
