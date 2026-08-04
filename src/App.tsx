@@ -1,14 +1,64 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useMetricsStore } from './store/useMetricsStore';
 import type { MetricEntry } from './store/useMetricsStore';
 import MetricsChart from './components/MetricsChart';
 
+interface CoreMetricsBackup {
+  format: 'coremetrics-backup';
+  version: 1;
+  exportedAt: string;
+  data: {
+    entries: MetricEntry[];
+    targetWeight: number | null;
+  };
+}
+
+const isMetricEntry = (value: unknown): value is MetricEntry => {
+  if (!value || typeof value !== 'object') return false;
+
+  const entry = value as Record<string, unknown>;
+  const numberFields = [
+    'timestamp',
+    'weight',
+    'bodyFat',
+    'skeletalMuscle',
+    'bmi',
+    'restingMetabolism',
+    'bodyAge',
+    'visceralFat',
+  ];
+
+  return typeof entry.id === 'string'
+    && entry.id.length > 0
+    && numberFields.every(
+      (field) => typeof entry[field] === 'number' && Number.isFinite(entry[field])
+    );
+};
+
+const isCoreMetricsBackup = (value: unknown): value is CoreMetricsBackup => {
+  if (!value || typeof value !== 'object') return false;
+
+  const backup = value as Record<string, unknown>;
+  if (backup.format !== 'coremetrics-backup' || backup.version !== 1) return false;
+  if (typeof backup.exportedAt !== 'string' || Number.isNaN(Date.parse(backup.exportedAt))) return false;
+  if (!backup.data || typeof backup.data !== 'object') return false;
+
+  const data = backup.data as Record<string, unknown>;
+  const validTarget = data.targetWeight === null
+    || (typeof data.targetWeight === 'number' && Number.isFinite(data.targetWeight));
+
+  return Array.isArray(data.entries)
+    && data.entries.every(isMetricEntry)
+    && validTarget;
+};
+
 function App() {
-  const { entries, targetWeight, setTargetWeight, addEntry, updateEntry, deleteEntry } = useMetricsStore();
+  const { entries, targetWeight, setTargetWeight, addEntry, updateEntry, deleteEntry, restoreData } = useMetricsStore();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTarget, setEditingTarget] = useState(false);
   const [tempTarget, setTempTarget] = useState('');
   const [displayCount, setDisplayCount] = useState(10);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = () => {
     const backup = {
@@ -34,6 +84,33 @@ function App() {
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
+  };
+
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const parsed: unknown = JSON.parse(await file.text());
+      if (!isCoreMetricsBackup(parsed)) {
+        window.alert('CoreMetricsの有効なバックアップファイルではありません。');
+        return;
+      }
+
+      const confirmed = window.confirm(
+        `現在の${entries.length}件の記録を、バックアップの${parsed.data.entries.length}件で置き換えます。\nこの操作を続けますか？`
+      );
+      if (!confirmed) return;
+
+      restoreData(parsed.data.entries, parsed.data.targetWeight);
+      setDisplayCount(10);
+      setEditingId(null);
+      window.alert(`${parsed.data.entries.length}件の記録を復元しました。`);
+    } catch {
+      window.alert('ファイルを読み込めませんでした。JSONバックアップを選択してください。');
+    } finally {
+      event.target.value = '';
+    }
   };
 
   const handleSaveTarget = () => {
@@ -161,14 +238,31 @@ function App() {
       <header className="app-header">
         <h1 className="app-title">CoreMetrics</h1>
         <p className="app-subtitle">Omron HBF-214-W Data Logger</p>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={handleExport}
-          style={{ width: 'auto', marginTop: '0.75rem' }}
-        >
-          データをエクスポート
-        </button>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleExport}
+            style={{ width: 'auto' }}
+          >
+            データをエクスポート
+          </button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="application/json,.json"
+            onChange={handleImport}
+            style={{ display: 'none' }}
+          />
+          <button
+            type="button"
+            className="btn"
+            onClick={() => importInputRef.current?.click()}
+            style={{ background: 'rgba(255,255,255,0.7)', color: 'var(--primary-dark)', border: '1px solid var(--glass-border)' }}
+          >
+            データをインポート
+          </button>
+        </div>
       </header>
 
       <main>

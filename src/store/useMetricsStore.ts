@@ -20,6 +20,7 @@ interface MetricsState {
   updateEntry: (id: string, entry: Omit<MetricEntry, 'id'>) => void;
   deleteEntry: (id: string) => void;
   setTargetWeight: (weight: number | null) => void;
+  restoreData: (entries: MetricEntry[], targetWeight: number | null) => void;
 }
 
 export const useMetricsStore = create<MetricsState>()(
@@ -50,6 +51,11 @@ export const useMetricsStore = create<MetricsState>()(
       setTargetWeight: (weight) =>
         set(() => ({
           targetWeight: weight,
+        })),
+      restoreData: (entries, targetWeight) =>
+        set(() => ({
+          entries: [...entries].sort((a, b) => b.timestamp - a.timestamp),
+          targetWeight,
         })),
     }),
     {
