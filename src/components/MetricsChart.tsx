@@ -15,6 +15,7 @@ import { useMetricsStore } from '../store/useMetricsStore';
 
 const metricsOptions = [
   { key: 'weight', label: '体重 (kg)' },
+  { key: 'waist', label: '腹囲 (cm)' },
   { key: 'bodyFat', label: '体脂肪率 (%)' },
   { key: 'visceralFat', label: '内臓脂肪レベル' },
   { key: 'skeletalMuscle', label: '骨格筋率 (%)' },
@@ -45,6 +46,7 @@ export default function MetricsChart() {
         { y1: Number((25 * heightSq).toFixed(1)), y2: Number((30 * heightSq).toFixed(1)), color: 'rgba(255, 152, 0, 0.2)' }, // 肥満(1度)
         { y1: Number((30 * heightSq).toFixed(1)), y2: 300, color: 'rgba(244, 67, 54, 0.2)' } // 肥満(2度以上)
       ],
+      waist: [],
       bodyFat: [
         { y1: 0, y2: 10, color: 'rgba(255, 235, 59, 0.2)' },
         { y1: 10, y2: 20, color: 'rgba(76, 175, 80, 0.2)' },
@@ -91,10 +93,25 @@ export default function MetricsChart() {
         return Number((sum / windowSlice.length).toFixed(1));
       };
 
+      const calcWaistMA = () => {
+        if (entry.waist === undefined) return null;
+
+        const measuredValues = reversed
+          .slice(0, idx + 1)
+          .map(item => item.waist)
+          .filter((value): value is number => typeof value === 'number' && Number.isFinite(value))
+          .slice(-7);
+
+        const sum = measuredValues.reduce((acc, value) => acc + value, 0);
+        return Number((sum / measuredValues.length).toFixed(1));
+      };
+
       return {
         ...entry,
+        waist: entry.waist ?? null,
         displayDate: `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`,
         weight_ma: calcMA('weight'),
+        waist_ma: calcWaistMA(),
         bodyFat_ma: calcMA('bodyFat'),
         visceralFat_ma: calcMA('visceralFat'),
         skeletalMuscle_ma: calcMA('skeletalMuscle'),
@@ -232,6 +249,7 @@ export default function MetricsChart() {
                 type="monotone" 
                 dataKey={metric} 
                 name={metricInfo?.label}
+                connectNulls={metric === 'waist'}
                 stroke="var(--primary-color)" 
                 strokeWidth={1.5}
                 dot={{ fill: 'var(--primary-color)', strokeWidth: 2, r: 4 }}
@@ -241,6 +259,7 @@ export default function MetricsChart() {
                 type="monotone" 
                 dataKey={`${metric}_ma`} 
                 name="移動平均"
+                connectNulls={metric === 'waist'}
                 stroke="#1e88e5" 
                 strokeWidth={2.5}
                 dot={false}

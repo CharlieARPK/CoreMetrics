@@ -32,7 +32,9 @@ const isMetricEntry = (value: unknown): value is MetricEntry => {
     && entry.id.length > 0
     && numberFields.every(
       (field) => typeof entry[field] === 'number' && Number.isFinite(entry[field])
-    );
+    )
+    && (entry.waist === undefined
+      || (typeof entry.waist === 'number' && Number.isFinite(entry.waist)));
 };
 
 const isCoreMetricsBackup = (value: unknown): value is CoreMetricsBackup => {
@@ -149,6 +151,7 @@ function App() {
   const [formData, setFormData] = useState({
     date: getLocalNow(),
     weight: '',
+    waist: '',
     bodyFat: '',
     visceralFat: '',
     skeletalMuscle: '',
@@ -172,6 +175,7 @@ function App() {
     const newEntry = {
       timestamp: new Date(formData.date).getTime(),
       weight: Number(formData.weight) || 0,
+      waist: formData.waist === '' ? undefined : Number(formData.waist),
       bodyFat: Number(formData.bodyFat) || 0,
       visceralFat: Number(formData.visceralFat) || 0,
       skeletalMuscle: Number(formData.skeletalMuscle) || 0,
@@ -190,6 +194,7 @@ function App() {
     setFormData({
       date: getLocalNow(),
       weight: '',
+      waist: '',
       bodyFat: '',
       visceralFat: '',
       skeletalMuscle: '',
@@ -204,6 +209,7 @@ function App() {
     setFormData({
       date: getLocalDateString(entry.timestamp),
       weight: String(entry.weight),
+      waist: entry.waist === undefined ? '' : String(entry.waist),
       bodyFat: String(entry.bodyFat),
       visceralFat: String(entry.visceralFat),
       skeletalMuscle: String(entry.skeletalMuscle),
@@ -219,6 +225,7 @@ function App() {
     setFormData({
       date: getLocalNow(),
       weight: '',
+      waist: '',
       bodyFat: '',
       visceralFat: '',
       skeletalMuscle: '',
@@ -310,6 +317,21 @@ function App() {
               <input type="number" step="0.1" id="weight" name="weight" className="form-input" value={formData.weight} onChange={handleChange} placeholder={latestEntry ? String(latestEntry.weight) : "0.0"} required />
             </div>
 
+            <div className="form-group">
+              <label className="form-label" htmlFor="waist">腹囲 (cm・任意)</label>
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                id="waist"
+                name="waist"
+                className="form-input"
+                value={formData.waist}
+                onChange={handleChange}
+                placeholder={latestEntry?.waist === undefined ? "未測定" : String(latestEntry.waist)}
+              />
+            </div>
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group">
                 <label className="form-label" htmlFor="bodyFat">体脂肪率 (%)</label>
@@ -393,6 +415,7 @@ function App() {
                     <div style={{ fontSize: '0.9rem', textAlign: 'right' }}>
                       体脂肪 {entry.bodyFat}% | 骨格筋 {entry.skeletalMuscle}%<br/>
                       内臓脂肪 {entry.visceralFat} | BMI {entry.bmi}
+                      {entry.waist !== undefined && <><br/>腹囲 {entry.waist} cm</>}
                     </div>
                   </div>
                 </div>

@@ -11,6 +11,7 @@ export interface MetricEntry {
   restingMetabolism: number;
   bodyAge: number;
   visceralFat: number;
+  waist?: number;
 }
 
 interface MetricsState {
