@@ -317,22 +317,6 @@ function App() {
               <input type="number" step="0.1" id="weight" name="weight" className="form-input" value={formData.weight} onChange={handleChange} placeholder={latestEntry ? String(latestEntry.weight) : "0.0"} required />
             </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="waist">腹囲 (cm)</label>
-              <input
-                type="number"
-                step="0.1"
-                min="0"
-                id="waist"
-                name="waist"
-                className="form-input"
-                value={formData.waist}
-                onChange={handleChange}
-                placeholder={latestEntry?.waist === undefined ? "未測定" : String(latestEntry.waist)}
-                required
-              />
-            </div>
-
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group">
                 <label className="form-label" htmlFor="bodyFat">体脂肪率 (%)</label>
@@ -364,6 +348,22 @@ function App() {
                 <label className="form-label" htmlFor="bmi">BMI</label>
                 <input type="number" step="0.1" id="bmi" name="bmi" className="form-input" value={formData.bmi} onChange={handleChange} placeholder={latestEntry ? String(latestEntry.bmi) : "0.0"} required />
               </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="waist">腹囲 (cm)</label>
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                id="waist"
+                name="waist"
+                className="form-input"
+                value={formData.waist}
+                onChange={handleChange}
+                placeholder={latestEntry?.waist === undefined ? "未測定" : String(latestEntry.waist)}
+                required
+              />
             </div>
 
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
