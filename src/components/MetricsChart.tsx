@@ -15,13 +15,13 @@ import { useMetricsStore } from '../store/useMetricsStore';
 
 const metricsOptions = [
   { key: 'weight', label: '体重 (kg)' },
-  { key: 'waist', label: '腹囲 (cm)' },
   { key: 'bodyFat', label: '体脂肪率 (%)' },
   { key: 'visceralFat', label: '内臓脂肪レベル' },
   { key: 'skeletalMuscle', label: '骨格筋率 (%)' },
   { key: 'bodyAge', label: '体年齢 (才)' },
   { key: 'restingMetabolism', label: '基礎代謝 (kcal)' },
-  { key: 'bmi', label: 'BMI' }
+  { key: 'bmi', label: 'BMI' },
+  { key: 'waist', label: '腹囲 (cm)' }
 ] as const;
 
 type MetricKey = typeof metricsOptions[number]['key'];
