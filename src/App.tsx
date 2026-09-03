@@ -436,6 +436,9 @@ function App() {
           </section>
         )}
       </main>
+      <footer style={{ textAlign: 'center', marginTop: '1.5rem', color: 'var(--text-muted)', fontSize: '0.7rem', opacity: 0.55 }}>
+        ver {__APP_VERSION__}
+      </footer>
     </div>
   );
 }
