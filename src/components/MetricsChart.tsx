@@ -12,6 +12,7 @@ import {
   Legend
 } from 'recharts';
 import { useMetricsStore } from '../store/useMetricsStore';
+import { getChartAxis } from './chartAxis';
 
 const metricsOptions = [
   { key: 'weight', label: '体重 (kg)' },
@@ -88,7 +89,7 @@ export default function MetricsChart() {
   }, [entries]);
 
   const chartData = useMemo(() => {
-    const reversed = [...entries].reverse();
+    const reversed = [...entries].sort((a, b) => a.timestamp - b.timestamp);
     return reversed.map((entry, idx) => {
       const d = new Date(entry.timestamp);
       
@@ -128,13 +129,7 @@ export default function MetricsChart() {
     });
   }, [entries]);
 
-  const xDomain = useMemo(() => {
-    if (chartData.length <= 1) {
-      const time = chartData[0]?.timestamp || 0;
-      return [time - 86400000, time + 86400000]; // 1データしかない場合は前後1日をドメインにする
-    }
-    return ['auto', 'auto'];
-  }, [chartData]);
+  const xAxis = useMemo(() => getChartAxis(chartData.map(entry => entry.timestamp)), [chartData]);
 
   if (entries.length === 0) return null;
 
@@ -142,8 +137,10 @@ export default function MetricsChart() {
     const currentZones = allMetricZones[metric] || [];
     const metricInfo = metricsOptions.find(o => o.key === metric);
 
-    const minX = chartData.length <= 1 ? (chartData[0]?.timestamp || 0) - 86400000 : chartData[0]?.timestamp;
-    const maxX = chartData.length <= 1 ? (chartData[0]?.timestamp || 0) + 86400000 : chartData[chartData.length - 1]?.timestamp;
+    const [minX, maxX] = xAxis.domain;
+    if (metric === 'waist' && !chartData.some(entry => entry.waist !== null)) {
+      return <div style={{ padding: '2rem 0', textAlign: 'center', color: 'var(--text-muted)' }}>腹囲 (cm)：まだ記録がありません</div>;
+    }
 
     return (
       <div style={{ marginBottom: showTitle ? '2rem' : '0' }}>
@@ -189,9 +186,15 @@ export default function MetricsChart() {
               <XAxis 
                 dataKey="timestamp" 
                 type="number"
-                domain={xDomain}
+                domain={xAxis.domain}
+                ticks={xAxis.ticks}
+                interval="preserveStartEnd"
+                allowDataOverflow
                 tickFormatter={(unixTime) => {
                   const d = new Date(unixTime);
+                  if (maxX - minX < 86400000) {
+                    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                  }
                   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
                 }}
                 tick={{ fill: 'var(--text-muted)', fontSize: 12 }} 
@@ -305,14 +308,17 @@ export default function MetricsChart() {
           </select>
         </div>
         {renderChart(selectedMetric, '300px', false)}
+        <p style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          最新記録：{new Date(xAxis.domain[1]).toLocaleString('ja-JP')} ／ 移動平均：直近7回（腹囲は測定済みの記録）
+        </p>
       </section>
 
       {/* 常時表示の全項目グラフ */}
       <section className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '1.25rem', color: 'var(--primary-dark)', marginBottom: '1.5rem' }}>すべての項目の推移</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '2rem' }}>
           {metricsOptions.map(opt => (
-            <div key={opt.key} style={{ background: 'rgba(255,255,255,0.3)', padding: '1rem', borderRadius: '12px' }}>
+            <div key={opt.key} style={{ minWidth: 0, background: 'rgba(255,255,255,0.3)', padding: '1rem', borderRadius: '12px' }}>
               {renderChart(opt.key, '200px', true)}
             </div>
           ))}
