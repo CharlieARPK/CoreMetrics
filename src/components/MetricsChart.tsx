@@ -311,7 +311,7 @@ export default function MetricsChart() {
         </div>
         {renderChart(selectedMetric, '300px', false)}
         <p style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-          最新記録：{new Date(xAxis.domain[1]).toLocaleString('ja-JP')} ／ 移動平均：直近7回（腹囲は測定済みの記録）
+          最新記録：{new Date(xAxis.domain[1]).toLocaleString('ja-JP')} ／ 移動平均：直近7回
         </p>
       </section>
 
