@@ -9,7 +9,8 @@ import {
   ResponsiveContainer,
   ReferenceArea,
   ReferenceLine,
-  Legend
+  Legend,
+  DefaultZIndexes
 } from 'recharts';
 import { useMetricsStore } from '../store/useMetricsStore';
 import { getChartAxis } from './chartAxis';
@@ -270,8 +271,8 @@ export default function MetricsChart() {
                 connectNulls={metric === 'waist'}
                 stroke="var(--primary-color)" 
                 strokeWidth={1.5}
-                dot={{ fill: 'var(--primary-color)', strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }}
+                dot={{ fill: 'var(--primary-color)', strokeWidth: 1, r: 3 }}
+                activeDot={{ r: 4, stroke: '#fff', strokeWidth: 1.5 }}
               />
               <Line 
                 type="monotone" 
@@ -280,6 +281,7 @@ export default function MetricsChart() {
                 connectNulls={metric === 'waist'}
                 stroke="#1e88e5" 
                 strokeWidth={2.5}
+                zIndex={DefaultZIndexes.scatter + 1}
                 dot={false}
                 activeDot={{ r: 4, stroke: '#fff', strokeWidth: 2 }}
               />
